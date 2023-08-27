@@ -3,27 +3,34 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"strings"
-	"time"
-
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	log "log/slog"
+	"os"
+	"strings"
+	"time"
 )
 
 const defaultRegion = "us-east-1"
 
 func main() {
+	log.SetDefault(log.New(log.NewJSONHandler(os.Stdout, nil)))
+
+	if len(os.Getenv("_LAMBDA_SERVER_PORT")) == 0 { // local testing
+		log.Info("local debugging started")
+		if err := HandleLambdaEvent(struct{}{}); err != nil {
+			log.Error("error during shutdown of the instances", "error", err)
+		}
+		return
+	}
 	lambda.Start(HandleLambdaEvent)
 }
 
 func HandleLambdaEvent(event interface{}) error {
-	fmt.Println("event", event)
-
 	region := envOrDefault("AWS_REGION", defaultRegion)
+	log.Info("event received", "event", event, "region", region)
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -51,7 +58,7 @@ func HandleLambdaEvent(event interface{}) error {
 		}
 	}
 	if len(ids) == 0 {
-		log.Println("no instances to stop")
+		log.Info("no instances to stop", "region", region)
 		return nil
 	}
 
@@ -60,7 +67,7 @@ func HandleLambdaEvent(event interface{}) error {
 	}); err != nil {
 		return fmt.Errorf("stopping: %w", err)
 	}
-	log.Printf("instances stopped: %s", ids)
+	log.Info("instances stopped", "instances", ids, "region", region)
 	return nil
 }
 

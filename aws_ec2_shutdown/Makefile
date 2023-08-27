@@ -1,7 +1,7 @@
-BIN_DIR ?= "bin/"
+BIN_DIR ?= bin
 
 clean:
-	if [ -e ${BIN_DIR} ]; then rm -rf ${BIN_DIR}; fi
+	if [ -d ${BIN_DIR} ]; then rm -rf ${BIN_DIR}; fi
 	mkdir -p ${BIN_DIR}
 
 build: clean
