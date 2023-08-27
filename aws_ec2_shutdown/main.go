@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	log "log/slog"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 const defaultRegion = "us-east-1"
@@ -18,7 +19,7 @@ const defaultRegion = "us-east-1"
 func main() {
 	log.SetDefault(log.New(log.NewJSONHandler(os.Stdout, nil)))
 
-	if len(os.Getenv("_LAMBDA_SERVER_PORT")) == 0 { // local testing
+	if len(os.Getenv("LAMBDA_RUNTIME_DIR")) == 0 { // local testing
 		log.Info("local debugging started")
 		if err := HandleLambdaEvent(struct{}{}); err != nil {
 			log.Error("error during shutdown of the instances", "error", err)
